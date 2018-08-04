@@ -25,15 +25,9 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    jlineVersion = "3.9.0"
-}
-
 dependencies {
 
     compile 'org.springframework.boot:spring-boot-starter'
-    compile "org.jline:jline:$jlineVersion"
-    compile "org.jline:jline-terminal-jansi:$jlineVersion"
 
     checkstyle 'com.puppycrawl.tools:checkstyle:8.11'
 

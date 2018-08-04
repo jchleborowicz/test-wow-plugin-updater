@@ -1,9 +1,14 @@
 package pl.jdata.wow.wow_plugin_updater;
 
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.LineReader;
-import org.jline.reader.UserInterruptException;
+import java.io.PrintWriter;
+import java.util.stream.Stream;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Component;
+import pl.jdata.wow.wow_plugin_updater.console.EndOfFileException;
+import pl.jdata.wow.wow_plugin_updater.console.LineReader;
 
 import static java.util.Objects.requireNonNull;
 
@@ -11,29 +16,31 @@ import static java.util.Objects.requireNonNull;
 public class WowPluginUpdater {
 
     private final LineReader lineReader;
+    private final PrintWriter output;
 
-    public WowPluginUpdater(LineReader lineReader) {
+    public WowPluginUpdater(LineReader lineReader, PrintWriter output) {
         this.lineReader = lineReader;
+        this.output = output;
     }
 
     void run() {
         while (true) {
             try {
+                output.print("> ");
                 final String line = lineReader.readLine();
                 processLine(line);
-            } catch (UserInterruptException e) {
-                //Ignore
             } catch (EndOfFileException e) {
                 return;
             }
         }
     }
 
-    private static void processLine(String line) {
+    private void processLine(String line) {
         requireNonNull(line);
 
         line = line.trim();
 
+        output.println(line.toUpperCase());
 
     }
 }
