@@ -1,28 +1,40 @@
 package pl.jdata.wow.wow_plugin_updater;
 
-import java.io.IOException;
-
+import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
+import org.jline.reader.UserInterruptException;
+import org.springframework.stereotype.Component;
 
+import static java.util.Objects.requireNonNull;
+
+@Component
 public class WowPluginUpdater {
 
-    public static void main(String[] args) throws IOException {
-        final Terminal terminal = TerminalBuilder.builder()
-                .system(true)
-                .build();
+    private final LineReader lineReader;
 
-        final LineReader reader = LineReaderBuilder.builder()
-                .terminal(terminal)
-                .build();
+    public WowPluginUpdater(LineReader lineReader) {
+        this.lineReader = lineReader;
+    }
 
+    void run() {
         while (true) {
-            String line = reader.readLine();
-
+            try {
+                final String line = lineReader.readLine();
+                processLine(line);
+            } catch (UserInterruptException e) {
+                //Ignore
+            } catch (EndOfFileException e) {
+                return;
+            }
         }
     }
 
+    private static void processLine(String line) {
+        requireNonNull(line);
+
+        line = line.trim();
+
+
+    }
 }
 
