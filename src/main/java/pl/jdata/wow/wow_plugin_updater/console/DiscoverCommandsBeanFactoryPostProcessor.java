@@ -22,7 +22,7 @@ public class DiscoverCommandsBeanFactoryPostProcessor implements BeanFactoryPost
     private void processBeanDefinition(ConfigurableListableBeanFactory beanFactory, String beanName) {
         Objects.requireNonNull(beanName);
 
-        final BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+        // final BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 
         //        final String beanClassName = beanDefinition.getBeanClassName();
         //

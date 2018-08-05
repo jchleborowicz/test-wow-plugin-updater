@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import pl.jdata.wow.wow_plugin_updater.Constants;
-import pl.jdata.wow.wow_plugin_updater.StringUtils;
+import pl.jdata.wow.wow_plugin_updater.PrintStringUtils;
 import pl.jdata.wow.wow_plugin_updater.console.Command;
 
 import static java.util.stream.Collectors.toList;
@@ -37,7 +37,9 @@ public class WowCommands {
     public void printPlugins() throws IOException {
         System.out.println("Printing plugins");
 
-        final List<WowPlugin> wowPluginStream = Files.list(Paths.get(Constants.PLUGIN_DIR))
+        final Path basePluginDirectory = Paths.get(Constants.PLUGIN_DIR);
+
+        final List<WowPlugin> wowPlugins = Files.list(basePluginDirectory)
                 .map(path -> {
                     try {
                         return processPluginDirectory(path);
@@ -48,12 +50,19 @@ public class WowCommands {
                 .filter(Objects::nonNull)
                 .collect(toList());
 
-        final List<String[]> result = wowPluginStream.stream()
-                .filter(p -> p.getVersion() == null)
-                .map(p -> new String[]{p.getName(), p.getVersion(), p.getExtendedProperties().toString()})
-                .collect(toList());
+        PrintStringUtils.printTable(
+                new String[]{"Name", "Version"},
+                wowPlugins.stream()
+                        .filter(p -> p.getVersion() != null)
+                        .map(p -> new String[]{p.getName(), p.getVersion(), p.getName()})
+        );
 
-        pl.jdata.wow.wow_plugin_updater.StringUtils.printTable(result);
+        // final List<String[]> result = wowPlugins.stream()
+        //         .filter(p -> p.getVersion() == null)
+        //         .map(p -> new String[]{p.getName(), p.getVersion(), p.getExtendedProperties().toString()})
+        //         .collect(toList());
+        //
+        // printTable(result);
     }
 
     private WowPlugin processPluginDirectory(Path path) {
@@ -91,7 +100,7 @@ public class WowCommands {
 
             final WowPlugin result = new WowPlugin();
 
-            result.setName(tocPath.getParent().getFileName().toString());
+            result.setName(extractModuleNameFromPath(tocPath).toString());
 
             final Map<String, BiConsumer<WowPlugin, String>> updaters = new HashMap<>();
             updaters.put("Author", WowPlugin::setAuthor);
@@ -123,7 +132,7 @@ public class WowCommands {
                     } else if (updater != null) {
                         updater.accept(result, value);
                     } else {
-                        StringUtils.printMap(properties);
+                        PrintStringUtils.printMap(properties);
                         throw new RuntimeException("Unknown property: " + key);
                     }
                 }
@@ -132,6 +141,16 @@ public class WowCommands {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Path extractModuleNameFromPath(Path tocPath) {
+        final Path parent = tocPath.getParent();
+
+        if (parent == null) {
+            throw new RuntimeException("Null parent");
+        }
+
+        return parent.getFileName();
     }
 
     private boolean isIgnored(Set<String> ignoredProperties, String key) {

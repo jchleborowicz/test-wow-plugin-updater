@@ -1,7 +1,10 @@
 package pl.jdata.wow.wow_plugin_updater;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,7 +32,7 @@ public class WowPluginUpdaterApplication {
 
     @Bean
     PrintWriter output() {
-        return new PrintWriter(System.out);
+        return new PrintWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
     }
 
 }

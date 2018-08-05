@@ -3,13 +3,15 @@ package pl.jdata.wow.wow_plugin_updater.console;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.stereotype.Component;
 
 @Component
 public class SystemLineReader implements LineReader {
 
-    private static final BufferedReader INPUT = new BufferedReader(new InputStreamReader(System.in));
+    private static final BufferedReader INPUT =
+            new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 
     @Override
     public String readLine() {
