@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,14 +13,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import pl.jdata.wow.wow_plugin_updater.Constants;
 import pl.jdata.wow.wow_plugin_updater.TableStringPrinter;
 import pl.jdata.wow.wow_plugin_updater.console.Command;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
 @Component
@@ -55,7 +59,9 @@ public class WowCommands {
                 .withBorder()
                 .rows(
                         wowPlugins.stream()
-                                .filter(p -> p.getVersion() != null)
+                                .sorted(comparing((WowPlugin wowPlugin) -> wowPlugin.getVersion() == null)
+                                        .thenComparing(WowPlugin::getName))
+                                // .filter(p -> p.getVersion() != null)
                                 .map(p -> new String[]{p.getName(), p.getVersion()})
                 )
                 .print();
