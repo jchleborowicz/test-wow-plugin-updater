@@ -52,6 +52,7 @@ public class WowCommands {
 
         TableStringPrinter.builder()
                 .header("Name", "Version")
+                .withBorder()
                 .rows(
                         wowPlugins.stream()
                                 .filter(p -> p.getVersion() != null)

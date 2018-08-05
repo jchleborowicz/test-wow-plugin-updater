@@ -39,28 +39,52 @@ public class TableStringPrinter {
             }
         });
 
+        StringBuilder separatorLineBuilder = new StringBuilder();
+        for (int i = 0; i < sizes.length; i++) {
+            int size = sizes[i];
+            if (i > 0) {
+                separatorLineBuilder.append("+");
+            }
+            separatorLineBuilder.append(StringUtils.repeat("-", size));
+        }
+
+        final String separatorLine = specification.isHasBorder() ? "+" + separatorLineBuilder.toString() + "+" :
+                separatorLineBuilder.toString();
+
+        if (specification.isHasBorder()) {
+            specification.getOutput().println(separatorLine);
+        }
+
         if (specification.getHeader() != null) {
             StringBuilder firstLine = new StringBuilder();
-            StringBuilder secondLine = new StringBuilder();
             for (int i = 0; i < sizes.length; i++) {
                 int size = sizes[i];
 
                 if (i > 0) {
                     firstLine.append("|");
-                    secondLine.append("+");
                 }
 
                 final String columnName = specification.getHeader().length > i ? specification.getHeader()[i] : "";
 
                 firstLine.append(StringUtils.rightPad(columnName, size));
-                secondLine.append(StringUtils.repeat('-', size));
             }
 
-            specification.getOutput().println(firstLine);
-            specification.getOutput().println(secondLine);
+            if (specification.hasBorder) {
+                specification.getOutput().print("|");
+            }
+            specification.getOutput().print(firstLine);
+            if (specification.hasBorder) {
+                specification.getOutput().print("|");
+            }
+            specification.getOutput().println();
+            specification.getOutput().println(separatorLine);
         }
 
         specification.getRows().forEach(row -> {
+                    if (specification.hasBorder) {
+                        specification.getOutput().print("|");
+                    }
+
                     for (int i = 0; i < sizes.length; i++) {
                         int size = sizes[i];
                         if (i > 0) {
@@ -71,9 +95,18 @@ public class TableStringPrinter {
 
                         specification.getOutput().print(StringUtils.rightPad(value, size));
                     }
+
+                    if (specification.hasBorder) {
+                        specification.getOutput().print("|");
+                    }
+
                     specification.getOutput().println();
                 }
         );
+
+        if (specification.isHasBorder()) {
+            specification.getOutput().println(separatorLine);
+        }
     }
 
     public static TableStringPrinterBuilder builder() {

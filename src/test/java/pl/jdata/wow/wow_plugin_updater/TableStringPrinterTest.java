@@ -15,18 +15,20 @@ public class TableStringPrinterTest {
 
         TableStringPrinter.builder()
                 .header("A", "Bam", "Moo")
-                // .withBorder()
+                .withBorder()
                 .row("Data1", "C", "F")
                 .row("D", "Cu", "Value")
                 .row("N")
                 .print(new PrintStream(output));
 
         assertThat(output.toString()).isEqualTo(
-                  "A    |Bam|Moo  " + System.lineSeparator()
-                + "-----+---+-----" + System.lineSeparator()
-                + "Data1|C  |F    " + System.lineSeparator()
-                + "D    |Cu |Value" + System.lineSeparator()
-                + "N    |   |     " + System.lineSeparator()
+                  "+-----+---+-----+" + System.lineSeparator()
+                + "|A    |Bam|Moo  |" + System.lineSeparator()
+                + "+-----+---+-----+" + System.lineSeparator()
+                + "|Data1|C  |F    |" + System.lineSeparator()
+                + "|D    |Cu |Value|" + System.lineSeparator()
+                + "|N    |   |     |" + System.lineSeparator()
+                + "+-----+---+-----+" + System.lineSeparator()
         );
     }
 
