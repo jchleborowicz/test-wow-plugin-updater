@@ -1,11 +1,7 @@
 package pl.jdata.wow.wow_plugin_updater;
 
 import java.io.PrintWriter;
-import java.util.stream.Stream;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Component;
 import pl.jdata.wow.wow_plugin_updater.console.EndOfFileException;
 import pl.jdata.wow.wow_plugin_updater.console.LineReader;

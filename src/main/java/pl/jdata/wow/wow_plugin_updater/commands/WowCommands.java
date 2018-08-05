@@ -15,10 +15,10 @@ import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import pl.jdata.wow.wow_plugin_updater.Command;
 import pl.jdata.wow.wow_plugin_updater.Constants;
+import pl.jdata.wow.wow_plugin_updater.StringUtils;
+import pl.jdata.wow.wow_plugin_updater.console.Command;
 
 import static java.util.stream.Collectors.toList;
 
@@ -37,7 +37,7 @@ public class WowCommands {
     public void printPlugins() throws IOException {
         System.out.println("Printing plugins");
 
-        final List<String[]> result = Files.list(Paths.get(Constants.PLUGIN_DIR))
+        final List<WowPlugin> wowPluginStream = Files.list(Paths.get(Constants.PLUGIN_DIR))
                 .map(path -> {
                     try {
                         return processPluginDirectory(path);
@@ -46,44 +46,14 @@ public class WowCommands {
                     }
                 })
                 .filter(Objects::nonNull)
+                .collect(toList());
+
+        final List<String[]> result = wowPluginStream.stream()
                 .filter(p -> p.getVersion() == null)
                 .map(p -> new String[]{p.getName(), p.getVersion(), p.getExtendedProperties().toString()})
                 .collect(toList());
 
-        printTable(result);
-    }
-
-    private void printTable(List<String[]> result) {
-        int columns = result.stream()
-                .mapToInt(a -> a.length)
-                .max()
-                .orElse(0);
-
-        int[] sizes = new int[columns];
-
-        result.forEach(row -> {
-            for (int i = 0; i < row.length; i++) {
-                final String s = row[i];
-                final int length = s == null ? 0 : s.length();
-                if (sizes[i] < length) {
-                    sizes[i] = length;
-                }
-            }
-        });
-
-        result.stream().map(row -> {
-                    StringBuilder text = new StringBuilder();
-                    for (int i = 0; i < row.length; i++) {
-                        if (i > 0) {
-                            text.append(" : ");
-                        }
-                        String s = row[i];
-                        text.append(StringUtils.rightPad(s, sizes[i]));
-                    }
-                    return text.toString();
-                }
-        )
-                .forEach(System.out::println);
+        pl.jdata.wow.wow_plugin_updater.StringUtils.printTable(result);
     }
 
     private WowPlugin processPluginDirectory(Path path) {
@@ -153,7 +123,7 @@ public class WowCommands {
                     } else if (updater != null) {
                         updater.accept(result, value);
                     } else {
-                        printMap(properties);
+                        StringUtils.printMap(properties);
                         throw new RuntimeException("Unknown property: " + key);
                     }
                 }
@@ -167,19 +137,6 @@ public class WowCommands {
     private boolean isIgnored(Set<String> ignoredProperties, String key) {
         return ignoredProperties.stream()
                 .anyMatch(s -> Pattern.compile(s).matcher(key).matches());
-    }
-
-    private void printMap(Map<String, String> properties) {
-        int max = properties.keySet()
-                .stream()
-                .mapToInt(String::length)
-                .max()
-                .orElse(0);
-
-        properties.entrySet().stream()
-                .map(entry -> String.format("%-" + max + "s : %s", entry.getKey(), entry.getValue()))
-                .sorted()
-                .forEach(System.out::println);
     }
 
 }

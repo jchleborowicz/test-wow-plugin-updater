@@ -1,6 +1,4 @@
-package pl.jdata.wow.wow_plugin_updater;
-
-import java.io.PrintStream;
+package pl.jdata.wow.wow_plugin_updater.console;
 
 public @interface Command {
 

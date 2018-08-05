@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.springframework.stereotype.Component;
-import pl.jdata.wow.wow_plugin_updater.console.LineReader;
 
 @Component
 public class SystemLineReader implements LineReader {

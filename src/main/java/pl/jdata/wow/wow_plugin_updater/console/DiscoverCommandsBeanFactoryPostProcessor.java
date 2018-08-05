@@ -1,4 +1,4 @@
-package pl.jdata.wow.wow_plugin_updater;
+package pl.jdata.wow.wow_plugin_updater.console;
 
 import java.util.Objects;
 import java.util.stream.Stream;
