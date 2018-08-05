@@ -10,6 +10,9 @@ buildscript {
     }
 }
 
+plugins {
+    id 'net.ltgt.apt' version '0.15'
+}
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'checkstyle'
@@ -26,10 +29,14 @@ repositories {
 }
 
 dependencies {
-
     compile 'org.springframework.boot:spring-boot-starter'
+    compile 'org.apache.commons:commons-lang3:3.7'
+
+    compileOnly 'org.projectlombok:lombok:1.16.20'
 
     checkstyle 'com.puppycrawl.tools:checkstyle:8.11'
+
+    annotationProcessor "org.projectlombok:lombok:1.16.20"
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.springframework.boot:spring-boot-starter-test'

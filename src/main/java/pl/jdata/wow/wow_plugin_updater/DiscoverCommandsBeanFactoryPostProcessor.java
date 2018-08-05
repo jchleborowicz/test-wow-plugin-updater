@@ -24,13 +24,13 @@ public class DiscoverCommandsBeanFactoryPostProcessor implements BeanFactoryPost
 
         final BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 
-//        final String beanClassName = beanDefinition.getBeanClassName();
-//
-//        try {
-//            final Class<?> beanClass = Class.forName(beanClassName);
-//        } catch (Throwable e) {
-//            throw new RuntimeException("Error when processing bean " + beanName, e);
-//        }
+        //        final String beanClassName = beanDefinition.getBeanClassName();
+        //
+        //        try {
+        //            final Class<?> beanClass = Class.forName(beanClassName);
+        //        } catch (Throwable e) {
+        //            throw new RuntimeException("Error when processing bean " + beanName, e);
+        //        }
     }
 
 }
