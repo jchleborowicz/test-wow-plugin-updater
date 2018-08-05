@@ -56,7 +56,7 @@ public class WowCommands {
                 .rows(
                         wowPlugins.stream()
                                 .filter(p -> p.getVersion() != null)
-                                .map(p -> new String[]{p.getName(), p.getVersion(), p.getName()})
+                                .map(p -> new String[]{p.getName(), p.getVersion()})
                 )
                 .print();
 
