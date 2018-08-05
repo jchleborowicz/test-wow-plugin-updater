@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import pl.jdata.wow.wow_plugin_updater.Constants;
-import pl.jdata.wow.wow_plugin_updater.PrintStringUtils;
+import pl.jdata.wow.wow_plugin_updater.TableStringPrinter;
 import pl.jdata.wow.wow_plugin_updater.console.Command;
 
 import static java.util.stream.Collectors.toList;
@@ -50,12 +50,14 @@ public class WowCommands {
                 .filter(Objects::nonNull)
                 .collect(toList());
 
-        PrintStringUtils.printTable(
-                new String[]{"Name", "Version"},
-                wowPlugins.stream()
-                        .filter(p -> p.getVersion() != null)
-                        .map(p -> new String[]{p.getName(), p.getVersion(), p.getName()})
-        );
+        TableStringPrinter.builder()
+                .header("Name", "Version")
+                .rows(
+                        wowPlugins.stream()
+                                .filter(p -> p.getVersion() != null)
+                                .map(p -> new String[]{p.getName(), p.getVersion(), p.getName()})
+                )
+                .print();
 
         // final List<String[]> result = wowPlugins.stream()
         //         .filter(p -> p.getVersion() == null)
@@ -132,7 +134,7 @@ public class WowCommands {
                     } else if (updater != null) {
                         updater.accept(result, value);
                     } else {
-                        PrintStringUtils.printMap(properties);
+                        TableStringPrinter.printMap(properties);
                         throw new RuntimeException("Unknown property: " + key);
                     }
                 }
