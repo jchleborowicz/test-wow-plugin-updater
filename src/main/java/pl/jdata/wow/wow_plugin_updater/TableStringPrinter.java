@@ -113,10 +113,13 @@ public class TableStringPrinter {
         return new TableStringPrinterBuilder();
     }
 
-    public static void printMap(Map<String, String> values) {
+    public static void printMap(Map<?, ?> values) {
         TableStringPrinter.builder()
                 .rows(values.entrySet().stream()
-                        .map(entry -> new String[]{entry.getKey(), entry.getValue()})
+                        .map(entry -> new String[]{
+                                entry.getKey() == null ? "" : entry.getKey().toString(),
+                                entry.getValue() == null ? "" : entry.getValue().toString()
+                        })
                 )
                 .print();
     }
@@ -154,6 +157,16 @@ public class TableStringPrinter {
         public TableStringPrinterBuilder row(String... values) {
             this.specification.getRows().add(values);
             return this;
+        }
+
+        public TableStringPrinterBuilder rows(Map<?, ?> values) {
+            return rows(values.entrySet()
+                    .stream()
+                    .map(entry -> new String[]{
+                            entry.getKey() == null ? "" : entry.getKey().toString(),
+                            entry.getValue() == null ? "" : entry.getValue().toString()
+                    })
+            );
         }
 
         public TableStringPrinterBuilder rows(List<String[]> values) {

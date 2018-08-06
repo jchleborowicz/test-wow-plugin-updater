@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,13 +12,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import pl.jdata.wow.wow_plugin_updater.Constants;
+import pl.jdata.wow.wow_plugin_updater.MyFileUtils;
 import pl.jdata.wow.wow_plugin_updater.TableStringPrinter;
 import pl.jdata.wow.wow_plugin_updater.console.Command;
 
@@ -29,12 +27,25 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class WowCommands {
 
+    private static final String TEMP_DIRECTORY_NAME = "temp";
+
+    private List<String> pluginUrls = Arrays.asList("https://wow.curseforge.com/projects/bagnon/files/latest");
+
     public static void main(String[] args) {
         try {
-            new WowCommands().printPlugins();
+            final WowCommands wowCommands = new WowCommands();
+            // wowCommands.printPlugins();
+            wowCommands.downloadPlugins();
         } catch (Throwable e) {
             e.printStackTrace(System.out);
         }
+    }
+
+    private void downloadPlugins() {
+        pluginUrls.forEach(s -> {
+            final Path temporaryDir = MyFileUtils.createDirectoryIfDoesNotExist(TEMP_DIRECTORY_NAME);
+            HttpExample.downloadPlugin(s, temporaryDir, true);
+        });
     }
 
     @Command(name = "p", description = "Print plugin versions")
