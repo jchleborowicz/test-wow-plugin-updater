@@ -14,7 +14,7 @@ import pl.jdata.wow.wow_plugin_updater.MyFileUtils;
 
 public class HttpExample {
 
-    private final String TEMP_DIRECTORY_NAME = "temp";
+    private static final String TEMP_DIRECTORY_NAME = "temp";
 
     public static void main(String[] args) {
         // final URL url = new URL("http://example.com/");
