@@ -3,7 +3,6 @@ package pl.jdata.wow.wow_plugin_updater;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.boot.SpringApplication;
@@ -20,7 +19,7 @@ public class WowPluginUpdaterApplication {
                 SpringApplication.run(WowPluginUpdaterApplication.class, args);
 
         try {
-            applicationContext.getBean(WowCommands.class).printPlugins();
+            applicationContext.getBean(WowCommands.class).getLocalPlugins();
         } finally {
             try {
                 applicationContext.close();

@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,23 +27,32 @@ import org.springframework.stereotype.Component;
 import pl.jdata.wow.wow_plugin_updater.Constants;
 import pl.jdata.wow.wow_plugin_updater.MyFileUtils;
 import pl.jdata.wow.wow_plugin_updater.TableStringPrinter;
-import pl.jdata.wow.wow_plugin_updater.console.Command;
 
-import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Component
 public class WowCommands {
 
-    private static final String TEMP_DIRECTORY_NAME = "temp";
+    private static final String TEMP_DIRECTORY_NAME = "build/temp-plugins";
 
-    private List<String> pluginUrls = Arrays.asList("https://wow.curseforge.com/projects/bagnon/files/latest");
+    private List<String> pluginUrls = Arrays.asList(
+            "https://wow.curseforge.com/projects/bagnon/files/latest",
+            "https://wow.curseforge.com/projects/auctioneer/files/latest",
+            "https://wow.curseforge.com/projects/deadly-boss-mods/files/latest",
+            "https://wow.curseforge.com/projects/gatherer/files/latest",
+            "https://wow.curseforge.com/projects/nugie-combo-bar/files/latest",
+            "https://www.curseforge.com/wow/addons/bartender4/download/2585279/file",
+            "https://wow.curseforge.com/projects/details/files/latest"
+    );
 
     public static void main(String[] args) {
         try {
             final WowCommands wowCommands = new WowCommands();
-            // wowCommands.printPlugins();
-            // final List<Path> downloadedPaths = wowCommands.downloadPlugins(TEMP_DIRECTORY_NAME);
+            final List<WowPlugin> localPlugins = wowCommands.getLocalPlugins();
+
+            wowCommands.downloadPlugins(TEMP_DIRECTORY_NAME, false);
+
             final List<Path> downloadedPaths = new ArrayList<>();
 
             Files.newDirectoryStream(Paths.get(TEMP_DIRECTORY_NAME),
@@ -52,15 +61,32 @@ public class WowCommands {
 
             List<WowPlugin> downloadedPlugins = wowCommands.readDowloadedPlugins(downloadedPaths);
 
-            TableStringPrinter.builder()
-                    .withBorder()
-                    .header("Name", "Version")
-                    .rows(
-                            downloadedPlugins.stream()
-                                    .map(p -> new String[]{p.getName(), p.getVersion()})
-                    )
-                    .print();
+            final Set<String> ignoredPlugins = new HashSet<>(Arrays.asList("SlideBar", "!Swatter"));
 
+            final Map<String, WowPlugin> downloadedPluginsByName = downloadedPlugins.stream()
+                    .filter(plugin -> !ignoredPlugins.contains(plugin.getName()))
+                    .collect(toMap(WowPlugin::getName, Function.identity()));
+
+            List<String> errors = new ArrayList<>();
+
+            localPlugins.forEach(localPlugin -> {
+                final WowPlugin downloadedPlugin = downloadedPluginsByName.get(localPlugin.getName());
+
+                if (downloadedPlugin == null) {
+                    if (!ignoredPlugins.contains(localPlugin.getName())) {
+                        errors.add("plugin not dowloaded: " + localPlugin.getName());
+                    }
+                } else if (!Objects.equals(localPlugin.getVersion(), downloadedPlugin.getVersion())) {
+                    errors.add("new version availale for plugin " + localPlugin.getName() + ": "
+                            + localPlugin.getVersion() + " -> " + downloadedPlugin.getVersion());
+                }
+            });
+
+            if (errors.isEmpty()) {
+                System.out.println("No errors!!! YAY");
+            } else {
+                System.out.println(errors.stream().collect(Collectors.joining("\n* ", "Errors:\n* ", "\n")));
+            }
         } catch (Throwable e) {
             e.printStackTrace(System.out);
         }
@@ -86,10 +112,6 @@ public class WowCommands {
                                 final String zipEntryName = zipEntry.getName();
                                 final Matcher matcher = pattern.matcher(zipEntryName);
                                 if (matcher.matches()) {
-                                    final String pluginDirectoryName = matcher.group(1);
-                                    System.out.println(" * file: " + zipEntryName);
-
-
                                     final Stream<String> tocContent =
                                             Stream.of(IOUtils.toString(zipInputStream, "UTF-8").split("\n"));
                                     plugins.add(readToc(tocContent, matcher.group(1)));
@@ -112,22 +134,19 @@ public class WowCommands {
                 .collect(toList());
     }
 
-    private List<Path> downloadPlugins(String directoryName) {
+    private List<Path> downloadPlugins(String directoryName, boolean overwriteExisting) {
         return pluginUrls.stream()
                 .map(s -> {
                     final Path temporaryDir = MyFileUtils.createDirectoryIfDoesNotExist(directoryName);
-                    return HttpExample.downloadPlugin(s, temporaryDir, true);
+                    return HttpExample.downloadPlugin(s, temporaryDir, overwriteExisting);
                 })
                 .collect(toList());
     }
 
-    @Command(name = "p", description = "Print plugin versions")
-    public void printPlugins() throws IOException {
-        System.out.println("Printing plugins");
-
+    public List<WowPlugin> getLocalPlugins() throws IOException {
         final Path basePluginDirectory = Paths.get(Constants.PLUGIN_DIR);
 
-        final List<WowPlugin> wowPlugins = Files.list(basePluginDirectory)
+        return Files.list(basePluginDirectory)
                 .map(path -> {
                     try {
                         return processPluginDirectory(path);
@@ -137,25 +156,6 @@ public class WowCommands {
                 })
                 .filter(Objects::nonNull)
                 .collect(toList());
-
-        TableStringPrinter.builder()
-                .header("Name", "Version")
-                .withBorder()
-                .rows(
-                        wowPlugins.stream()
-                                .sorted(comparing((WowPlugin wowPlugin) -> wowPlugin.getVersion() == null)
-                                        .thenComparing(WowPlugin::getName))
-                                // .filter(p -> p.getVersion() != null)
-                                .map(p -> new String[]{p.getName(), p.getVersion()})
-                )
-                .print();
-
-        // final List<String[]> result = wowPlugins.stream()
-        //         .filter(p -> p.getVersion() == null)
-        //         .map(p -> new String[]{p.getName(), p.getVersion(), p.getExtendedProperties().toString()})
-        //         .collect(toList());
-        //
-        // printTable(result);
     }
 
     private WowPlugin processPluginDirectory(Path path) {
