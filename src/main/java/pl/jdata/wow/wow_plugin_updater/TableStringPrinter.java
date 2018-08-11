@@ -93,7 +93,7 @@ public class TableStringPrinter {
 
                         final String value = row.length > i ? row[i] : "";
 
-                        specification.getOutput().print(StringUtils.rightPad(value, size));
+                        specification.getOutput().print(StringUtils.rightPad(StringUtils.defaultString(value), size));
                     }
 
                     if (specification.hasBorder) {

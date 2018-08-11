@@ -1,8 +1,6 @@
 package pl.jdata.wow.wow_plugin_updater.commands;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,9 +43,12 @@ public class WowCommands {
         try {
             final WowCommands wowCommands = new WowCommands();
             // wowCommands.printPlugins();
-            // final List<Path> downloadedPaths = wowCommands.downloadPlugins();
-            final List<Path> downloadedPaths = Collections.singletonList(
-                    Paths.get("C:\\Users\\jacek\\IdeaProjects\\wow-plugin-updater\\temp\\Bagnon_8.0.2.zip"));
+            // final List<Path> downloadedPaths = wowCommands.downloadPlugins(TEMP_DIRECTORY_NAME);
+            final List<Path> downloadedPaths = new ArrayList<>();
+
+            Files.newDirectoryStream(Paths.get(TEMP_DIRECTORY_NAME),
+                    path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".zip"))
+                    .forEach(downloadedPaths::add);
 
             List<WowPlugin> downloadedPlugins = wowCommands.readDowloadedPlugins(downloadedPaths);
 
@@ -56,7 +57,7 @@ public class WowCommands {
                     .header("Name", "Version")
                     .rows(
                             downloadedPlugins.stream()
-                            .map(p -> new String[]{p.getName(), p.getVersion()})
+                                    .map(p -> new String[]{p.getName(), p.getVersion()})
                     )
                     .print();
 
@@ -111,10 +112,10 @@ public class WowCommands {
                 .collect(toList());
     }
 
-    private List<Path> downloadPlugins() {
+    private List<Path> downloadPlugins(String directoryName) {
         return pluginUrls.stream()
                 .map(s -> {
-                    final Path temporaryDir = MyFileUtils.createDirectoryIfDoesNotExist(TEMP_DIRECTORY_NAME);
+                    final Path temporaryDir = MyFileUtils.createDirectoryIfDoesNotExist(directoryName);
                     return HttpExample.downloadPlugin(s, temporaryDir, true);
                 })
                 .collect(toList());
